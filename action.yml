@@ -1,0 +1,51 @@
+name: Publish to Azure App Service
+description: Logins to Azure and publishes a web app from a directory. Then, it runs migrations scripts to update the database.
+
+branding:
+  color: blue
+  icon: upload-cloud
+
+inputs:
+  azure-credentials:
+    description: Credentials to login to Azure.
+    required: true
+  app-name:
+    description: The App Service name.
+    required: true
+  publish-dir:
+    description: The directory containing the artifacts to publish (defaults to the current directory).
+    required: false
+    default: .
+  slot-name:
+    description: The deployment slot to use (defaults to 'production').
+    required: false
+    default: production
+  migrations-script-path:
+    description: The path to the .sql file to apply migrations to the database.
+    required: true
+  db-server-name:
+    description: The name of the database server.
+    required: true
+  db-connection-string:
+    description: The connection string to the database.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ inputs.azure-credentials }}
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        package: ${{ inputs.publish-dir }}
+        app-name: ${{ inputs.app-name }}
+        slot-name: ${{ inputs.slot-name }}
+    - name: Apply database migrations
+      uses: azure/sql-action@v1
+      with:
+        server-name: ${{ inputs.db-server-name }}
+        connection-string: ${{ inputs.db-connection-string }}
+        sql-file: ${{ inputs.migrations-script-path }}
