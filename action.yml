@@ -20,7 +20,7 @@ inputs:
     description: The deployment slot to use (defaults to 'production').
     required: false
     default: production
-  migrations-script-path:
+  migrations-script:
     description: The path to the .sql file to apply migrations to the database.
     required: true
   db-server-name:
@@ -48,4 +48,4 @@ runs:
       with:
         server-name: ${{ inputs.db-server-name }}
         connection-string: ${{ inputs.db-connection-string }}
-        sql-file: ${{ inputs.migrations-script-path }}
+        sql-file: ${{ inputs.migrations-script }}
