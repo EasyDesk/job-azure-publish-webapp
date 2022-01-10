@@ -37,15 +37,23 @@ runs:
       uses: azure/login@v1
       with:
         creds: ${{ inputs.azure-credentials }}
-    - name: Deploy to Azure App Service
-      uses: azure/webapps-deploy@v2
+    - name: Stop the web app
+      uses: azure/CLI@v1
       with:
-        package: ${{ inputs.publish-dir }}
-        app-name: ${{ inputs.app-name }}
-        slot-name: ${{ inputs.slot-name }}
+        inlineScript: az webapp stop --name '${{ inputs.app-name }}' --slot '${{ inputs.slot-name }}'
     - name: Apply database migrations
       uses: azure/sql-action@v1
       with:
         server-name: ${{ inputs.db-server-name }}
         connection-string: ${{ inputs.db-connection-string }}
         sql-file: ${{ inputs.migrations-script }}
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        package: ${{ inputs.publish-dir }}
+        app-name: ${{ inputs.app-name }}
+        slot-name: ${{ inputs.slot-name }}
+    - name: Start the web app
+      uses: azure/CLI@v1
+      with:
+        inlineScript: az webapp start --name '${{ inputs.app-name }}' --slot '${{ inputs.slot-name }}'
